@@ -11,8 +11,6 @@ def create_app():
     server.config.from_object(BaseConfig)
 
     register_dashapps(server)
-    if server.config['LOCATION'] != 'natrent0':
-        register_dashapps_log(server)
     register_extensions(server)
     register_blueprints(server)
 
@@ -39,26 +37,6 @@ def register_dashapps(app):
 
     _protect_dashviews(dashapp1)
 
-def register_dashapps_log(app):
-    if server.config['LOCATION'] != 'natrent0':
-        from app.log_dashapp.layout import layout
-        from app.log_dashapp.callbacks import register_callbacks
-
-        # Meta tags for viewport responsiveness
-        meta_viewport = {"name": "viewport", "content": "width=device-width, initial-scale=1, shrink-to-fit=no"}
-
-        log_dashapp = dash.Dash(__name__,
-                             server=app,
-                             url_base_pathname='/log_dashboard/',
-                             assets_folder=get_root_path(__name__) + '/log_dashboard/assets/',
-                             meta_tags=[meta_viewport])
-
-        with app.app_context():
-            log_dashapp.title = 'Log Dashapp'
-            log_dashapp.layout = layout
-            register_callbacks(log_dashapp)
-
-        _protect_dashviews(log_dashapp)
 
 
 def _protect_dashviews(dashapp):
