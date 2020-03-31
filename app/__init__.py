@@ -11,7 +11,8 @@ def create_app():
     server.config.from_object(BaseConfig)
 
     register_dashapps(server)
-    register_dashapps_log(server)
+    if LOCATION is not 'natrent0':
+        register_dashapps_log(server)
     register_extensions(server)
     register_blueprints(server)
 
@@ -50,7 +51,7 @@ def register_dashapps_log(app):
                          url_base_pathname='/log_dashboard/',
                          assets_folder=get_root_path(__name__) + '/log_dashboard/assets/',
                          meta_tags=[meta_viewport])
-                    
+
     with app.app_context():
         log_dashapp.title = 'Log Dashapp'
         log_dashapp.layout = layout

@@ -6,3 +6,4 @@ class BaseConfig:
     SQLALCHEMY_DATABASE_URI = os.environ.get('DATABASE_URL')
     SQLALCHEMY_TRACK_MODIFICATIONS = False
     SECRET_KEY = os.environ['SECRET_KEY'] or 'you-will-never-guess'
+    LOCATION = os.environ['LOCATION']
