@@ -11,7 +11,7 @@ def create_app():
     server.config.from_object(BaseConfig)
 
     register_dashapps(server)
-    if LOCATION is not 'natrent0':
+    if server.config['LOCATION'] is not 'natrent0':
         register_dashapps_log(server)
     register_extensions(server)
     register_blueprints(server)
