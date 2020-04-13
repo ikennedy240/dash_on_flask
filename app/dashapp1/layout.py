@@ -12,8 +12,8 @@ cities = c.fetchall()
 cities = [{'label': city[0], 'value': city[0]} for city in [('Average Across Locations',0)]+cities]
 
 layout = html.Div([
-    html.H3('Scraper Status Dashboard'),
-    html.H1('Scraped Data By Location and Date'),
+    html.H1('Scraper Status Dashboard'),
+    html.H3('Scraped Data By Location and Date'),
     dcc.Dropdown(
         id='my-dropdown',
         options = cities,
@@ -21,7 +21,9 @@ layout = html.Div([
         multi=True
     ),
     dcc.Graph(id='scrapers-map'),
+    html.H3('Collected Listings By Metro'),
     dcc.Graph(id='listing-graph'),
+    html.H3('NA Address Rates By Metro'),
     dcc.Graph(id='log-graph')
 ], style={'width': '500'})
 

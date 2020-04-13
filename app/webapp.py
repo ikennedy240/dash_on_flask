@@ -1,8 +1,9 @@
 from flask import Blueprint
-from flask import redirect
+from flask import redirect, flash
 from flask import render_template
 from flask import request
 from flask import url_for
+from flask import send_file
 from flask_login import current_user
 from flask_login import login_required
 from flask_login import login_user
@@ -11,9 +12,13 @@ from werkzeug.urls import url_parse
 
 from app.extensions import db
 from app.forms import LoginForm
-from app.forms import RegistrationForm
+from app.forms import RegistrationForm, ExtractSelectionForm
 from app.models import User
+from app.dashapp1.callbacks import psql_connect
+import pandas as pd
+import os
 
+extract_path = 'extracts/extract.csv'
 server_bp = Blueprint('main', __name__)
 
 
@@ -66,3 +71,30 @@ def register():
         return redirect(url_for('main.login'))
 
     return render_template('register.html', title='Register', form=form)
+
+@server_bp.route('/extract/', methods=['GET', 'POST'])
+def upload_form():
+        conn = psql_connect()
+        c = conn.cursor()
+        c.execute('SELECT DISTINCT listing_loc FROM clean')
+        city_call = c.fetchall()
+        cities = [(city[0],  city[0]) for city in city_call]
+        form = ExtractSelectionForm()
+        form.city.choices = cities
+        if form.validate_on_submit():
+            # delete old extract
+            if os.path.exists('app/'+extract_path):
+                os.remove('app/'+extract_path)
+            flash('Data requested for city {}'.format(
+                form.city.data))
+            extract_call = "SELECT * FROM clean WHERE listing_loc = '{}' AND listing_date BETWEEN NOW() - INTERVAL '7 DAYS' AND NOW()".format(form.city.data)
+            df = pd.read_sql(extract_call, conn)
+            print(os.getcwd())
+            df.to_csv('app/'+extract_path)
+            return redirect('/extract')
+        return render_template('extract.html', cities=cities, form = form)
+
+@server_bp.route('/download')
+def download_file():
+	path = extract_path
+	return send_file(path, as_attachment=True)

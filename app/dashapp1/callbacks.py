@@ -53,8 +53,6 @@ def register_callbacks(dashapp):
             sql_dropdown_values = [value for value in selected_dropdown_value if value != 'Average Across Locations']
             get_all = sql.SQL("SELECT listing_loc, listing_date, COUNT(*) as count FROM clean WHERE listing_loc IN ({}) AND listing_date BETWEEN NOW() - INTERVAL '7 DAYS' AND NOW() GROUP BY listing_loc, listing_date").format(sql.SQL(', ').join(map(sql.Literal, sql_dropdown_values)))
             df = df.append(pd.read_sql(get_all, conn), sort = True)
-        print(selected_dropdown_value)
-        print(df.head)
         conn.close()
         df = df.sort_values('listing_date')
         return {
@@ -74,10 +72,10 @@ def register_callbacks(dashapp):
         conn = psql_connect()
         c = conn.cursor()
         get_avg = '''
-        SELECT listing_date, (COUNT(*)/COUNT(DISTINCT listing_loc)) as count 
-        FROM clean 
-        WHERE listing_date BETWEEN NOW() - INTERVAL '7 DAYS' AND NOW() 
-        GROUP BY listing_date
+        SELECT DATE(date) as day, AVG(na_address) as na_address, AVG(na_rent) as na_rent, AVG(na_total) as na_total,  AVG((error!='none')::INT) as error 
+        FROM craigslist_log 
+        WHERE date BETWEEN NOW() - INTERVAL '7 DAYS' AND NOW() 
+        GROUP BY day ORDER BY day
         '''
         df = pd.read_sql(get_avg, conn)
         df['listing_loc'] = 'Average Across Locations'
@@ -85,20 +83,22 @@ def register_callbacks(dashapp):
             selected_dropdown_value = [selected_dropdown_value]
         else:
             sql_dropdown_values = [value for value in selected_dropdown_value if value != 'Average Across Locations']
-            get_all = sql.SQL("SELECT listing_loc, listing_date, COUNT(*) as count FROM clean WHERE listing_loc IN ({}) AND listing_date BETWEEN NOW() - INTERVAL '7 DAYS' AND NOW() GROUP BY listing_loc, listing_date").format(sql.SQL(', ').join(map(sql.Literal, sql_dropdown_values)))
+            get_all = sql.SQL("SELECT DATE(date) as day, AVG(na_address) as na_address, AVG(na_rent) as na_rent, AVG(na_total) as na_total, AVG((error!='none')::INT) as error, loc as listing_loc FROM craigslist_log WHERE loc IN ({}) AND DATE(date) BETWEEN NOW() - INTERVAL '7 DAYS' AND NOW() GROUP BY listing_loc, day").format(sql.SQL(', ').join(map(sql.Literal, sql_dropdown_values)))
             df = df.append(pd.read_sql(get_all, conn), sort = True)
         conn.close()
-        df = df.sort_values('listing_date')
+        print(selected_dropdown_value)
+        print(df.head(20))
+        df = df.sort_values('day')
         return {
             'data': [{
-                'x': df.listing_date[df.listing_loc == loc],
-                'y': df.loc[df.listing_loc == loc,'count'],
+                'x': df.loc[df.listing_loc == loc, 'day'],
+                'y': df.loc[df.listing_loc == loc,'na_address'],
                 #'name' : df.listing_loc,
                 'color' : loc,
                 'mode' : 'lines+markers',
                 'name' : loc
             } for loc in selected_dropdown_value],
-            'layout': {'margin': {'l': 40, 'r': 0, 't': 20, 'b': 30}}
+            'layout': {'margin': {'l': 40, 'r': 0, 't': 20, 'b': 30}, 'yaxis' : {'range':(0,1)}}
         }
 
     @dashapp.callback(Output('scrapers-map', 'figure'), [Input('my-dropdown', 'value')])

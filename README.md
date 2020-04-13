@@ -1,3 +1,13 @@
+# To Do
+
+-- preview of results before download
+-- create graphics rather than just download
+-- more data validation
+-- extract by time/period, with clear indication of availability
+-- quantify duplicates
+-- thinking about geocodes, show rates of different types on dash
+
+
 # Dash on flask with flask_login
 An example of a seamless integration of a Dash app into an existing Flask app based on the application factory pattern.
 
