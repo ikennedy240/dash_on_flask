@@ -4,6 +4,7 @@ from wtforms import PasswordField
 from wtforms import StringField
 from wtforms import SubmitField
 from wtforms import SelectField
+from wtforms.fields.html5 import DateField
 from wtforms.validators import DataRequired
 
 
@@ -21,4 +22,6 @@ class RegistrationForm(FlaskForm):
 
 class ExtractSelectionForm(FlaskForm):
     city = SelectField('City')
+    start_date = DateField('startDate', format='%Y-%m-%d')
+    end_date = DateField('endDate', format='%Y-%m-%d')
     submit = SubmitField('Create Extract')

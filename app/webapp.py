@@ -81,18 +81,27 @@ def upload_form():
         cities = [(city[0],  city[0]) for city in city_call]
         form = ExtractSelectionForm()
         form.city.choices = cities
+        cols = ['seq_id','listing_src','listing_loc', 'listing_date', 'listing_title', 'listing_text', 'scraped_neighborhoods', 'scraped_google_maps_url', 'scraped_avail', 'clean_rent', 'clean_beds', 'clean_baths', 'clean_sqft', 'post_origin', 'post_id', 'match_type','x','y','statefp','countyfp','tractce', 'namelsad','geoid'] 
         if form.validate_on_submit():
             # delete old extract
             if os.path.exists('app/'+extract_path):
                 os.remove('app/'+extract_path)
-            flash('Data requested for city {}'.format(
-                form.city.data))
-            extract_call = "SELECT * FROM clean WHERE listing_loc = '{}' AND listing_date BETWEEN NOW() - INTERVAL '7 DAYS' AND NOW()".format(form.city.data)
+            extract_call = "SELECT {} FROM tract17 JOIN clean ON ST_contains(tract17.geometry, clean.geometry) ".format(','.join(cols)) 
+            extract_call = extract_call+"WHERE listing_loc = '{}' AND listing_date BETWEEN '{}' AND '{}'".format(form.city.data, form.start_date.data, form.end_date.data)
             df = pd.read_sql(extract_call, conn)
             print(os.getcwd())
+            flash('Data requested for city {} from {} to {}: found {} rows'.format(
+                form.city.data,form.start_date.data, form.end_date.data, df.shape[0]))
             df.to_csv('app/'+extract_path)
             return redirect('/extract')
-        return render_template('extract.html', cities=cities, form = form)
+        try:
+           df =  pd.read_csv('app/'+extract_path, nrows = 10)
+        except:
+            df = pd.DataFrame()
+        print("loaded {} rows, colnames are {}".format(df.shape[0], ', '.join(df.columns.tolist())))
+        return render_template('extract.html', cities=cities, form = form, tables=[df.head().to_html(classes='data')], titles=df.columns.values)
+
+
 
 @server_bp.route('/download')
 def download_file():

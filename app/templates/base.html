@@ -1,13 +1,23 @@
-<div>
-  Test:
-  <a href="{{ url_for('main.index') }}">Home</a>
-  {% if current_user.is_anonymous %}
-  <a href="{{ url_for('main.login') }}">Login</a>
-  {% else %}
-  <a href="{{ url_for('main.logout') }}">Logout</a>
-  <a href="/dashboard">Dashboard</a>
-  {% endif %}
+{% extends 'bootstrap/base.html' %}
 
-  {% block content %}
-  {% endblock %}
-</div>
+{% block title %}
+    {% if title %}{{ title }} - Rental Scraping Dashboard{% else %}Welcome to the Rental Scraping Dashboard{% endif %}
+{% endblock %}
+
+{% block navbar %}
+    <nav class="navbar navbar-default">
+      <a href="{{ url_for('main.index') }}">Home</a>
+      {% if current_user.is_anonymous %}
+      <a href="{{ url_for('main.login') }}">Login</a>
+      {% else %}
+      <a href="{{ url_for('main.logout') }}">Logout</a>
+      <a href="/dashboard">Dashboard</a>
+      {% endif %}
+   </nav>
+{% endblock %}
+{% block content %}
+   <div class="container">
+     {% block app_content %}
+     {% endblock %}
+   </div>
+{% endblock %}
