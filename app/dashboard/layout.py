@@ -1,5 +1,5 @@
 import dash_core_components as dcc, dash_html_components as html, sqlite3
-from app.dashapp1.callbacks import psql_connect
+from app.dashboard.callbacks import psql_connect
 conn = psql_connect()
 c = conn.cursor()
 c.execute('SELECT DISTINCT location FROM geocoded')

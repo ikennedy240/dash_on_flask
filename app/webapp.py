@@ -14,7 +14,7 @@ from app.forms import LoginForm
 from app.forms import RegistrationForm, ExtractSelectionForm
 from app.models import User
 # import function to connect to natrent0
-from app.dashapp1.callbacks import psql_connect
+from app.dashboard.callbacks import psql_connect
 import pandas as pd
 import os
 
