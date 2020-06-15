@@ -1,16 +1,16 @@
 from flask_login import UserMixin
 from werkzeug.security import check_password_hash
 from werkzeug.security import generate_password_hash
-
 from app.extensions import db
 from app.extensions import login
 
-
+# login
 @login.user_loader
 def load_user(id):
     return User.query.get(int(id))
 
-
+# user class def
+# we want to add some more info to this like email and project and maybe access level
 class User(UserMixin, db.Model):
     id = db.Column(db.Integer, primary_key=True)
     username = db.Column(db.String(64), index=True, unique=True)
